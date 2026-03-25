@@ -1,2 +1,2 @@
 # WorldSimApp
-VIRTUAL World Simulator. 
+VIRTUALIZED Global Geopolitical and Economic Simulation Platform.
