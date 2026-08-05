@@ -1,0 +1,154 @@
+# ---------------------------------------------------------------
+# .NET / Avalonia .gitignore
+# 项目: WorldSimApp (.NET 8.0 + Avalonia 11, JetBrains Rider)
+# ---------------------------------------------------------------
+
+# ===== .NET 构建产物 =====
+[Bb]in/
+[Oo]bj/
+[Oo]ut/
+artifacts/
+
+# ===== NuGet =====
+*.nupkg
+*.snupkg
+**/[Pp]ackages/*
+!**/[Pp]ackages/build/
+*.nuget.props
+*.nuget.targets
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# ===== 发布产物 (Self-contained / AOT 发布包) =====
+[Pp]ublish/
+*.zip
+*.app/
+*.dmg
+*.msi
+*.exe
+*.AppImage
+
+# ===== Visual Studio / Rider / VS Code IDE 文件 =====
+.vs/
+.idea/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.userprefs
+*.vshost.*
+*.vcxproj.user
+
+# Rider 专属缓存
+.idea/**/workspace.xml
+.idea/**/tasks.xml
+.idea/**/usage.local.xml
+.idea/**/shelf/
+.idea/**/dictionaries/
+.idea/**/contentModel.xml
+.idea/**/dataSources/
+.idea/**/dataSources.ids
+.idea/**/dataSources.local.xml
+.idea/**/sqlDataSources.xml
+.idea/**/dynamic.xml
+.idea/**/uiDesigner.xml
+.idea/**/dbnavigator.xml
+
+# VS Code
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
+
+# Avalonia 诊断 / 预览缓存
+.avaloniacache/
+*.avalonia_diag
+
+# ===== 编译生成的可执行文件 / 原生库 (AOT 输出) =====
+*.dll
+*.pdb
+*.dylib
+*.so
+*.exe
+*.apphost
+singlefilehost
+createdump
+
+# 注意: 上面会忽略所有 dll/pdb, 项目源码中不存在此类文件;
+# 若以后将 dll 作为资源提交, 请使用 `!path/to/file.dll` 强制包含
+
+# ===== 日志 / 临时文件 =====
+*.log
+*.tlog
+*.tmp
+*.temp
+*.bak
+*.cache
+*.dbmdl
+*.dbproj.schemaview
+*.jfm
+*.pidb
+*.swp
+*~
+
+# ===== 运行时数据 / 存档 (SavePathManager 可能生成) =====
+Saves/
+SaveData/
+*.save
+*.save.json
+*.sav
+
+# ===== 操作系统生成的文件 =====
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+.Spotlight-V100
+.Trashes
+
+# Windows
+Thumbs.db
+ehthumbs.db
+ehthumbs_vista.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+
+# ===== 测试 / 覆盖率 =====
+[Tt]est[Rr]esult*/
+[Bb]uild[Ll]og.*
+TestResult.xml
+[Bb]uildArtifacts/
+*.coverage
+*.coveragexml
+coverage*.json
+coverage*.xml
+coverage*.info
+
+# ===== 安全敏感文件 (切勿入库) =====
+*.pfx
+*.p12
+*.key
+*.cert
+*.pem
+secrets.json
+appsettings.*.Local.json
+appsettings.Development.json
+.env
+.env.*
+
+# ===== 其他 =====
+ServiceFabricBackup/
+*.bkc
+Backup*/
+*.syncn

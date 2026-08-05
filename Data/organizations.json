@@ -1,0 +1,108 @@
+{
+  "organizations": [
+    {
+      "id": "un",
+      "name": "Global Alliance Council",
+      "description": "International organization promoting peace and cooperation",
+      "type": "Political",
+      "founderId": "usa",
+      "headquartersId": "usa",
+      "memberIds": ["usa", "china", "russia", "uk", "france", "japan", "germany", "india", "brazil", "canada", "australia", "south_korea", "italy", "spain", "mexico", "indonesia", "saudi_arabia", "south_africa", "nigeria", "argentina", "pakistan", "thailand", "vietnam", "turkey", "poland", "ukraine", "israel", "iran", "netherlands", "sweden", "switzerland", "austria"],
+      "requiredStability": 30,
+      "effectMilitary": 0,
+      "effectTrade": 0.05,
+      "effectStability": 2
+    },
+    {
+      "id": "nato",
+      "name": "Atlantic Defense Pact",
+      "description": "Military alliance for collective defense",
+      "type": "Military",
+      "founderId": "usa",
+      "headquartersId": "usa",
+      "memberIds": ["usa", "uk", "france", "germany", "italy", "canada", "poland", "turkey", "spain", "netherlands"],
+      "requiredStability": 50,
+      "effectMilitary": 0.15,
+      "effectTrade": 0.02,
+      "effectStability": 5
+    },
+    {
+      "id": "eu",
+      "name": "Continental Union",
+      "description": "Political and economic union of European states",
+      "type": "Economic",
+      "founderId": "germany",
+      "headquartersId": "germany",
+      "memberIds": ["germany", "france", "italy", "spain", "poland", "netherlands", "sweden", "austria"],
+      "requiredStability": 60,
+      "effectMilitary": 0.05,
+      "effectTrade": 0.15,
+      "effectStability": 8
+    },
+    {
+      "id": "opec",
+      "name": "Energy Cartel",
+      "description": "Energy producing countries alliance",
+      "type": "Economic",
+      "founderId": "saudi_arabia",
+      "headquartersId": "saudi_arabia",
+      "memberIds": ["saudi_arabia", "iran", "iraq", "uae", "kuwait"],
+      "requiredStability": 40,
+      "effectMilitary": 0,
+      "effectTrade": 0.1,
+      "effectStability": 3
+    },
+    {
+      "id": "g20",
+      "name": "Economic Summit",
+      "description": "Forum of major economies",
+      "type": "Economic",
+      "founderId": "usa",
+      "headquartersId": null,
+      "memberIds": ["usa", "china", "russia", "uk", "germany", "france", "japan", "india", "brazil", "australia", "canada", "italy", "spain", "mexico", "indonesia", "saudi_arabia", "south_africa", "turkey", "south_korea", "argentina"],
+      "requiredStability": 35,
+      "effectMilitary": 0,
+      "effectTrade": 0.08,
+      "effectStability": 4
+    },
+    {
+      "id": "asean",
+      "name": "Southeast Asian Alliance",
+      "description": "Regional cooperation organization",
+      "type": "Political",
+      "founderId": "indonesia",
+      "headquartersId": "indonesia",
+      "memberIds": ["indonesia", "thailand", "vietnam"],
+      "requiredStability": 40,
+      "effectMilitary": 0.05,
+      "effectTrade": 0.08,
+      "effectStability": 3
+    },
+    {
+      "id": "arab_league",
+      "name": "Desert Nations Union",
+      "description": "Regional organization of Middle Eastern states",
+      "type": "Political",
+      "founderId": "saudi_arabia",
+      "headquartersId": "saudi_arabia",
+      "memberIds": ["saudi_arabia", "uae", "iraq", "syria", "egypt", "jordan", "lebanon"],
+      "requiredStability": 35,
+      "effectMilitary": 0.02,
+      "effectTrade": 0.05,
+      "effectStability": 2
+    },
+    {
+      "id": "cstom",
+      "name": "Commonwealth Alliance",
+      "description": "English-speaking nations cooperation",
+      "type": "Political",
+      "founderId": "uk",
+      "headquartersId": "uk",
+      "memberIds": ["uk", "usa", "canada", "australia", "new_zealand"],
+      "requiredStability": 50,
+      "effectMilitary": 0.08,
+      "effectTrade": 0.06,
+      "effectStability": 4
+    }
+  ]
+}

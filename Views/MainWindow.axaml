@@ -1,0 +1,655 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:WorldSimApp.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:dg="using:Avalonia.Controls"
+        xmlns:models="using:WorldSimApp.Models"
+        mc:Ignorable="d" d:DesignWidth="1400" d:DesignHeight="900"
+        x:Class="WorldSimApp.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Icon="/Assets/avalonia-logo.ico"
+        Title="World Simulation"
+        Width="1400" Height="900"
+         Background="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=Background}">
+
+    <Window.Styles>
+        <Style Selector="Button">
+            <Setter Property="CornerRadius" Value="4"/>
+        </Style>
+    </Window.Styles>
+
+    <Design.DataContext>
+        <vm:MainWindowViewModel/>
+    </Design.DataContext>
+
+    <Grid RowDefinitions="Auto,*,Auto" Margin="10">
+        
+        <!-- Header -->
+        <Border Grid.Row="0" Background="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=HeaderBg}" CornerRadius="8" Padding="15" Margin="0,0,0,10">
+            <Grid ColumnDefinitions="*,Auto">
+                <StackPanel>
+                    <TextBlock Text="World Simulation" FontSize="24" FontWeight="Bold" Foreground="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=TextColor}"/>
+                    <TextBlock Text="{Binding WorldStatus}" FontSize="14" Foreground="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=MutedText}" Margin="0,5,0,0"/>
+                </StackPanel>
+                
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10">
+                    <Button Content="Start" Command="{Binding StartSimulationCommand}" 
+                            IsEnabled="{Binding !IsSimulationRunning}"
+                            Background="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=Success}" Foreground="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=ButtonText}" Padding="15,8"/>
+                    <Button Content="Stop" Command="{Binding StopSimulationCommand}" 
+                            IsEnabled="{Binding IsSimulationRunning}"
+                            Background="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=Danger}" Foreground="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=ButtonText}" Padding="15,8"/>
+                    <Button Content="Next Turn" Command="{Binding NextTurnCommand}"
+                            IsEnabled="{Binding !IsSimulationRunning}"
+                            Background="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=Info}" Foreground="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=ButtonText}" Padding="15,8"/>
+                    <Button Content="Reset" Command="{Binding ResetSimulationCommand}"
+                            Background="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=ButtonNeutralBg}" Foreground="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=ButtonTextNeutral}" Padding="15,8"/>
+                    <Button Content="Save" Command="{Binding SaveGameCommand}"
+                            Background="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=SpecialBlue}" Foreground="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=ButtonText}" Padding="15,8"/>
+                    <Button Content="Load" Command="{Binding LoadGameCommand}"
+                            Background="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=Purple}" Foreground="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=ButtonText}" Padding="15,8"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Main Content -->
+        <Grid Grid.Row="1" ColumnDefinitions="350,*,350">
+            
+            <!-- Left Panel -->
+            <Grid Grid.Column="0" RowDefinitions="Auto,Auto,*">
+                
+                <!-- Filter Panel -->
+                <Border Grid.Row="0" Background="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=HeaderBg}" CornerRadius="8" Padding="10" Margin="0,0,5,5">
+                    <StackPanel Spacing="8">
+                        <TextBlock Text="Filter &amp; Sort" FontWeight="Bold" Foreground="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=TextColor}"/>
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <ComboBox ItemsSource="{Binding Regions}" SelectedItem="{Binding SelectedRegion}" Width="120"
+                                      Background="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=ComboBoxBg}"
+                                      Foreground="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=TextColor}"
+                                      BorderBrush="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=ComboBoxBorder}"/>
+                            <ComboBox ItemsSource="{Binding SortOptions}" SelectedItem="{Binding SortBy}" Width="100"
+                                      Background="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=ComboBoxBg}"
+                                      Foreground="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=TextColor}"
+                                      BorderBrush="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=ComboBoxBorder}"/>
+                            <Button Content="Apply" Command="{Binding ApplyFilterCommand}" Padding="10,5"
+                                    Background="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=ButtonPrimaryBg}" Foreground="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=ButtonText}"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+                
+                <!-- Player Country Selection -->
+                <Border Grid.Row="1" Background="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=HeaderBg}" CornerRadius="8" Padding="10" Margin="0,0,5,5">
+                    <StackPanel Spacing="8">
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <TextBlock Text="Select Your Country" FontWeight="Bold" Foreground="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=TextColor}"/>
+                            <TextBlock Text="{Binding PlayerCountryDisplay, StringFormat='(Playing: {0})'}" Foreground="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=Accent}" FontSize="12" FontWeight="Bold"/>
+                        </StackPanel>
+                        <TextBlock Text="Select from dropdown to play as that nation" Foreground="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=MutedText}" FontSize="11"/>
+                        <ComboBox ItemsSource="{Binding FilteredCountries}" SelectedItem="{Binding SelectedCountry}" 
+                                 DisplayMemberBinding="{Binding Name}" Width="300" HorizontalAlignment="Stretch"
+                                 Background="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=ComboBoxBg}"
+                                 Foreground="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=TextColor}"
+                                 BorderBrush="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=ComboBoxBorder}"/>
+                        <Grid ColumnDefinitions="*,*">
+                            <Button Grid.Column="0" Content="Confirm Selection" Command="{Binding ConfirmPlayerCountryCommand}" 
+                                    Background="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=Success}" Foreground="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=ButtonText}" Padding="10,5" Margin="0,0,5,0"/>
+                            <Button Grid.Column="1" Content="Remove Selection" Command="{Binding RemovePlayerCountryCommand}" 
+                                    Background="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=Danger}" Foreground="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=ButtonText}" Padding="10,5"/>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+                
+                <!-- Countries List -->
+                <Border Grid.Row="2" Background="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=HeaderBg}" CornerRadius="8" Padding="10" Margin="0,0,5,0">
+                    <Grid RowDefinitions="Auto,*">
+                        <TextBlock Text="Countries" FontSize="18" FontWeight="Bold" Foreground="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=TextColor}" Margin="0,0,0,10"/>
+                        <ListBox Grid.Row="1" ItemsSource="{Binding FilteredCountries}" 
+                                 Background="Transparent" BorderThickness="0"
+                                 SelectionMode="Single">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Padding="8" Margin="2" Background="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=ItemBg}" CornerRadius="4"
+                                            PointerPressed="OnCountrySelect">
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding Name}" FontWeight="Bold" Foreground="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=TextColor}" FontSize="14"/>
+                                            <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,3,0,0">
+                                                <TextBlock Text="{Binding Code}" Foreground="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=MutedText}" FontSize="11"/>
+                                                <TextBlock Text="{Binding Region}" Foreground="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=MutedText}" FontSize="11"/>
+                                            </StackPanel>
+                                            <StackPanel Orientation="Horizontal" Spacing="15" Margin="0,3,0,0">
+                                                <TextBlock Foreground="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=Accent}" FontSize="10">
+                                                    <TextBlock.Text>
+                                                        <MultiBinding StringFormat="GDP: ${0:N0}">
+                                                            <Binding Path="Gdp"/>
+                                                        </MultiBinding>
+                                                    </TextBlock.Text>
+                                                </TextBlock>
+                                                <TextBlock Foreground="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=MutedText}" FontSize="10">
+                                                    <TextBlock.Text>
+                                                        <MultiBinding StringFormat="Stability: {0:F1}%">
+                                                            <Binding Path="Stability"/>
+                                                        </MultiBinding>
+                                                    </TextBlock.Text>
+                                                </TextBlock>
+                                            </StackPanel>
+                                        </StackPanel>
+                                    </Border>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </Grid>
+                </Border>
+            </Grid>
+
+            <!-- Center Panel -->
+            <Grid Grid.Column="1" RowDefinitions="Auto,*">
+                
+                <!-- Decision Alert -->
+                <Border Grid.Row="0" IsVisible="{Binding HasPendingDecision}" Background="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=DangerBackground}" CornerRadius="8" Padding="15" Margin="5,0,5,5">
+                    <StackPanel Spacing="10">
+                        <TextBlock Text="DECISION REQUIRED" FontWeight="Bold" Foreground="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=DangerColor}" FontSize="16"/>
+                        <TextBlock Text="{Binding PendingDecision.Description}" Foreground="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=TextColor}" TextWrapping="Wrap"/>
+                        <ItemsControl ItemsSource="{Binding PendingDecision.Options}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <StackPanel Orientation="Vertical" Spacing="10"/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Button Content="{Binding Description}" 
+                                            Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).SelectDecisionOptionCommand}"
+                                            CommandParameter="{Binding Id}"
+                                            Background="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=Success}" 
+                                            Foreground="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=ButtonText}" Padding="15,8"/>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Border>
+                
+                <!-- Tab Control -->
+                <TabControl Grid.Row="1" SelectedIndex="{Binding SelectedTabIndex}" Margin="5,0">
+                    
+                    <!-- Player Actions Tab -->
+                    <TabItem Header="Actions">
+                        <Border Background="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=HeaderBg}" CornerRadius="8" Padding="15">
+                            <ScrollViewer>
+                                <StackPanel Spacing="20">
+                                    <StackPanel>
+                                        <TextBlock Text="Player Actions" FontSize="18" FontWeight="Bold" Foreground="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=TextColor}" Margin="0,0,0,10"/>
+                                        <TextBlock Text="Select a target country first, then perform actions" Foreground="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=MutedText}" FontSize="12"/>
+                                    </StackPanel>
+                                    
+                                    <Border Background="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=ItemBg}" CornerRadius="8" Padding="15">
+                                        <StackPanel Spacing="10">
+                                            <TextBlock Text="Target Country" FontWeight="Bold" Foreground="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=TextColor}"/>
+                                            <ComboBox ItemsSource="{Binding FilteredCountries}" SelectedItem="{Binding ActionTargetCountry}" 
+                                                     DisplayMemberBinding="{Binding Name}" Width="300"
+                                                     Background="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=ComboBoxBg}"
+                                                     Foreground="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=TextColor}"
+                                                     BorderBrush="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=ComboBoxBorder}"/>
+                                        </StackPanel>
+                                    </Border>
+                                    
+                                    <Border Background="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=ItemBg}" CornerRadius="8" Padding="15">
+                                        <StackPanel Spacing="10">
+                                            <TextBlock Text="Diplomatic Actions" FontWeight="Bold" Foreground="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=TextColor}"/>
+                                            <StackPanel Orientation="Horizontal" Spacing="10">
+                                                <Button Content="Form Alliance" Command="{Binding FormAllianceCommand}" Background="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=Success}" Foreground="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=ButtonText}" Padding="15,8"/>
+                                                <Button Content="Break Alliance" Command="{Binding BreakAllianceCommand}" Background="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=Danger}" Foreground="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=ButtonText}" Padding="15,8"/>
+                                                <Button Content="Declare War" Command="{Binding DeclareWarCommand}" Background="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=Purple}" Foreground="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=ButtonText}" Padding="15,8"/>
+                                                <Button Content="Trade Route" Command="{Binding EstablishTradeRouteCommand}" Background="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=Info}" Foreground="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=ButtonText}" Padding="15,8"/>
+                                            </StackPanel>
+                                        </StackPanel>
+                                    </Border>
+                                    
+                                    <Border Background="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=ItemBg}" CornerRadius="8" Padding="15">
+                                        <StackPanel Spacing="10">
+                                            <TextBlock Text="Economic Policy" FontWeight="Bold" Foreground="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=TextColor}"/>
+                                            <StackPanel Orientation="Horizontal" Spacing="10">
+                                                <ComboBox ItemsSource="{Binding PolicyOptions}" SelectedItem="{Binding SelectedPolicy}" Width="150"
+                                                        Background="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=ComboBoxBg}"
+                                                        Foreground="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=TextColor}"
+                                                        BorderBrush="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=ComboBoxBorder}"/>
+                                                <Button Content="Apply Policy" Command="{Binding ApplyEconomicPolicyCommand}" Background="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=SpecialBlue}" Foreground="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=ButtonText}" Padding="15,8"/>
+                                            </StackPanel>
+                                        </StackPanel>
+                                    </Border>
+                                    
+                                    <Border Background="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=ItemBg}" CornerRadius="8" Padding="15">
+                                        <StackPanel>
+                                            <TextBlock Text="Action Result" FontWeight="Bold" Foreground="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=TextColor}"/>
+                                            <TextBlock Text="{Binding PlayerActionResult}" Foreground="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=Accent}" FontSize="14" FontWeight="Bold" Margin="0,5,0,0"/>
+                                        </StackPanel>
+                                    </Border>
+                                </StackPanel>
+                            </ScrollViewer>
+                        </Border>
+                    </TabItem>
+                    
+                    <!-- Country Details Tab -->
+                    <TabItem Header="Country">
+                        <Border Background="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=HeaderBg}" CornerRadius="8" Padding="15">
+                            <Grid RowDefinitions="Auto,*">
+                                <TextBlock Text="{Binding SelectedCountryName}" FontSize="20" FontWeight="Bold" Foreground="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=TextColor}" Margin="0,0,0,10"/>
+                                <DataGrid Grid.Row="1" ItemsSource="{Binding CountryDetails}" AutoGenerateColumns="False" IsReadOnly="True" GridLinesVisibility="Horizontal" CanUserResizeColumns="True">
+                                    <DataGrid.Columns>
+                                        <DataGridTextColumn Header="Category" Binding="{Binding Category}" Width="150"/>
+                                        <DataGridTextColumn Header="Property" Binding="{Binding Property}" Width="*"/>
+                                        <DataGridTextColumn Header="Value" Binding="{Binding Value}" Width="2*"/>
+                                    </DataGrid.Columns>
+                                </DataGrid>
+                            </Grid>
+                        </Border>
+                    </TabItem>
+                    
+                    <!-- Statistics Tab -->
+                    <TabItem Header="Statistics">
+                        <Border Background="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=HeaderBg}" CornerRadius="8" Padding="15">
+                            <ScrollViewer>
+                                <StackPanel Spacing="20">
+                                    <TextBlock Text="{Binding CurrentTurn, StringFormat='World Statistics - Turn {0}'}" FontSize="20" FontWeight="Bold" Foreground="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=TextColor}" Margin="0,0,0,10"/>
+                                    
+                                    <StackPanel>
+                                        <TextBlock Text="World Overview" FontSize="16" FontWeight="Bold" Foreground="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=TextColor}" Margin="0,0,0,5"/>
+                                        <DataGrid ItemsSource="{Binding WorldOverview}" AutoGenerateColumns="False" IsReadOnly="True" GridLinesVisibility="Horizontal" Height="150" CanUserResizeColumns="True">
+                                            <DataGrid.Columns>
+                                                <DataGridTextColumn Header="Metric" Binding="{Binding Metric}" Width="*"/>
+                                                <DataGridTextColumn Header="Value" Binding="{Binding Value}" Width="*"/>
+                                            </DataGrid.Columns>
+                                        </DataGrid>
+                                    </StackPanel>
+                                    
+                                    <!-- <Grid ColumnDefinitions="*,*,*,*"> -->
+                                        <!-- <StackPanel Grid.Column="0" Margin="0,0,10,0"> -->
+                                            <TextBlock Text="Top GDP" FontSize="14" FontWeight="Bold" Foreground="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=TextColor}" Margin="0,0,0,5"/>
+                                            <DataGrid ItemsSource="{Binding TopGdpCountries}" AutoGenerateColumns="False" IsReadOnly="True" Height="180" CanUserResizeColumns="True">
+                                                <DataGrid.Columns>
+                                                    <DataGridTextColumn Header="#" Binding="{Binding Rank}" Width="30"/>
+                                                    <DataGridTextColumn Header="Country" Binding="{Binding Name}" Width="*"/>
+                                                    <DataGridTextColumn Header="GDP" Binding="{Binding Value}" Width="100"/>
+                                                    <DataGridTextColumn Header="Growth" Binding="{Binding SubValue}" Width="60"/>
+                                                </DataGrid.Columns>
+                                            </DataGrid>
+                                        <!-- </StackPanel> -->
+                                        
+                                        <!-- <StackPanel Grid.Column="1" Margin="0,0,10,0"> -->
+                                            <TextBlock Text="Top Military" FontSize="14" FontWeight="Bold" Foreground="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=TextColor}" Margin="0,0,0,5"/>
+                                            <DataGrid ItemsSource="{Binding TopMilitaryCountries}" AutoGenerateColumns="False" IsReadOnly="True" Height="180" CanUserResizeColumns="True">
+                                                <DataGrid.Columns>
+                                                    <DataGridTextColumn Header="#" Binding="{Binding Rank}" Width="30"/>
+                                                    <DataGridTextColumn Header="Country" Binding="{Binding Name}" Width="*"/>
+                                                    <DataGridTextColumn Header="Power" Binding="{Binding Value}" Width="80"/>
+                                                </DataGrid.Columns>
+                                            </DataGrid>
+                                        <!-- </StackPanel> -->
+                                        
+                                        <!-- <StackPanel Grid.Column="2" Margin="0,0,10,0"> -->
+                                            <TextBlock Text="Top Happiness" FontSize="14" FontWeight="Bold" Foreground="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=TextColor}" Margin="0,0,0,5"/>
+                                            <DataGrid ItemsSource="{Binding TopHappinessCountries}" AutoGenerateColumns="False" IsReadOnly="True" Height="180" CanUserResizeColumns="True">
+                                                <DataGrid.Columns>
+                                                    <DataGridTextColumn Header="#" Binding="{Binding Rank}" Width="30"/>
+                                                    <DataGridTextColumn Header="Country" Binding="{Binding Name}" Width="*"/>
+                                                    <DataGridTextColumn Header="Happiness" Binding="{Binding Value}" Width="80"/>
+                                                </DataGrid.Columns>
+                                            </DataGrid>
+                                        <!-- </StackPanel> -->
+                                        
+                                        <!-- <StackPanel Grid.Column="3"> -->
+                                            <TextBlock Text="Top Technology" FontSize="14" FontWeight="Bold" Foreground="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=TextColor}" Margin="0,0,0,5"/>
+                                            <DataGrid ItemsSource="{Binding TopTechCountries}" AutoGenerateColumns="False" IsReadOnly="True" Height="180" CanUserResizeColumns="True">
+                                                <DataGrid.Columns>
+                                                    <DataGridTextColumn Header="#" Binding="{Binding Rank}" Width="30"/>
+                                                    <DataGridTextColumn Header="Country" Binding="{Binding Name}" Width="*"/>
+                                                    <DataGridTextColumn Header="Tech %" Binding="{Binding Value}" Width="60"/>
+                                                </DataGrid.Columns>
+                                            </DataGrid>
+                                        <!-- </StackPanel> -->
+                                    <!-- </Grid> -->
+                                    
+                                    <Grid ColumnDefinitions="*,*">
+                                        <StackPanel Grid.Column="0" Margin="0,0,10,0">
+                                            <TextBlock Text="Industry Breakdown" FontSize="14" FontWeight="Bold" Foreground="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=TextColor}" Margin="0,0,0,5"/>
+                                            <DataGrid ItemsSource="{Binding IndustryBreakdown}" AutoGenerateColumns="False" IsReadOnly="True" Height="120" CanUserResizeColumns="True">
+                                                <DataGrid.Columns>
+                                                    <DataGridTextColumn Header="Sector" Binding="{Binding Category}" Width="*"/>
+                                                    <DataGridTextColumn Header="World Average" Binding="{Binding Value}" Width="*"/>
+                                                </DataGrid.Columns>
+                                            </DataGrid>
+                                        </StackPanel>
+                                        
+                                        <StackPanel Grid.Column="1">
+                                            <TextBlock Text="Population Trends" FontSize="14" FontWeight="Bold" Foreground="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=TextColor}" Margin="0,0,0,5"/>
+                                            <DataGrid ItemsSource="{Binding PopulationTrends}" AutoGenerateColumns="False" IsReadOnly="True" Height="120" CanUserResizeColumns="True">
+                                                <DataGrid.Columns>
+                                                    <DataGridTextColumn Header="Metric" Binding="{Binding Category}" Width="*"/>
+                                                    <DataGridTextColumn Header="Value" Binding="{Binding Value}" Width="*"/>
+                                                </DataGrid.Columns>
+                                            </DataGrid>
+                                        </StackPanel>
+                                    </Grid>
+                                    
+                                    <StackPanel>
+                                        <TextBlock Text="Active Conflicts" FontSize="14" FontWeight="Bold" Foreground="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=TextColor}" Margin="0,0,0,5"/>
+                                        <DataGrid ItemsSource="{Binding Conflicts}" AutoGenerateColumns="False" IsReadOnly="True" Height="150" CanUserResizeColumns="True">
+                                            <DataGrid.Columns>
+                                                <DataGridTextColumn Header="Conflict" Binding="{Binding Name}" Width="*"/>
+                                                <DataGridTextColumn Header="Attacker" Binding="{Binding Attacker}" Width="120"/>
+                                                <DataGridTextColumn Header="Defender" Binding="{Binding Defender}" Width="120"/>
+                                                <DataGridTextColumn Header="Started" Binding="{Binding StartTurn}" Width="60"/>
+                                                <DataGridTextColumn Header="Duration" Binding="{Binding Duration}" Width="100"/>
+                                                <DataGridTextColumn Header="Casualties" Binding="{Binding Casualties}" Width="100"/>
+                                            </DataGrid.Columns>
+                                        </DataGrid>
+                                    </StackPanel>
+                                </StackPanel>
+                            </ScrollViewer>
+                        </Border>
+                    </TabItem>
+                    
+                    <!-- Trade Tab -->
+                    <TabItem Header="Trade">
+                        <Border Background="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=HeaderBg}" CornerRadius="8" Padding="15">
+                            <ScrollViewer>
+                                <StackPanel Spacing="20">
+                                    <TextBlock Text="Trade Network" FontSize="20" FontWeight="Bold" Foreground="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=TextColor}" Margin="0,0,0,10"/>
+                                    
+                                    <StackPanel>
+                                        <TextBlock Text="Top Trading Nations" FontSize="14" FontWeight="Bold" Foreground="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=TextColor}" Margin="0,0,0,5"/>
+                                        <DataGrid ItemsSource="{Binding TopTraders}" AutoGenerateColumns="False" IsReadOnly="True" Height="150" CanUserResizeColumns="True">
+                                            <DataGrid.Columns>
+                                                <DataGridTextColumn Header="#" Binding="{Binding Rank}" Width="60"/>
+                                                <DataGridTextColumn Header="Country" Binding="{Binding Name}" Width="*"/>
+                                                <DataGridTextColumn Header="Value" Binding="{Binding Value}" Width="100"/>
+                                            </DataGrid.Columns>
+                                        </DataGrid>
+                                    </StackPanel>
+                                    
+                                    <StackPanel>
+                                        <TextBlock Text="Active Trade Routes" FontSize="14" FontWeight="Bold" Foreground="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=TextColor}" Margin="0,0,0,5"/>
+                                        <DataGrid ItemsSource="{Binding TradeRoutes}" AutoGenerateColumns="False" IsReadOnly="True" CanUserResizeColumns="True">
+                                            <DataGrid.Columns>
+                                                <DataGridTextColumn Header="Exporter" Binding="{Binding Exporter}" Width="*"/>
+                                                <DataGridTextColumn Header="Importer" Binding="{Binding Importer}" Width="*"/>
+                                                <DataGridTextColumn Header="Value" Binding="{Binding Value}" Width="100"/>
+                                                <DataGridTextColumn Header="Resource" Binding="{Binding Resource}" Width="100"/>
+                                            </DataGrid.Columns>
+                                        </DataGrid>
+                                    </StackPanel>
+                                </StackPanel>
+                            </ScrollViewer>
+                        </Border>
+                    </TabItem>
+                    
+                    <!-- Wars Tab -->
+                    <TabItem Header="Wars">
+                        <Border Background="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=HeaderBg}" CornerRadius="8" Padding="15">
+                            <Grid RowDefinitions="Auto,*">
+                                <TextBlock Text="Active Conflicts" FontSize="20" FontWeight="Bold" Foreground="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=TextColor}" Margin="0,0,0,10"/>
+                                <ListBox Grid.Row="1" ItemsSource="{Binding ActiveWars}" Background="Transparent" BorderThickness="0">
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border Padding="10" Margin="2" Background="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=WarBg}" CornerRadius="4">
+                                                <StackPanel>
+                                                    <TextBlock Text="{Binding Name}" FontWeight="Bold" Foreground="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=DangerColor}" FontSize="14"/>
+                                                    <TextBlock Foreground="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=MutedText}" FontSize="12" Margin="0,5,0,0">
+                                                        <TextBlock.Text>
+                                                            <MultiBinding StringFormat="Turn {0}: Started">
+                                                                <Binding Path="StartTurn"/>
+                                                            </MultiBinding>
+                                                        </TextBlock.Text>
+                                                    </TextBlock>
+                                                </StackPanel>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
+                            </Grid>
+                        </Border>
+                    </TabItem>
+                    
+                    <!-- Organizations Tab -->
+                    <TabItem Header="Organizations">
+                        <Border Background="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=HeaderBg}" CornerRadius="8" Padding="15">
+                            <ListBox ItemsSource="{Binding Organizations}" Background="Transparent" BorderThickness="0">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Padding="10" Margin="2" Background="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=ItemBg}" CornerRadius="4">
+                                            <StackPanel>
+                                                <TextBlock Text="{Binding Name}" FontWeight="Bold" Foreground="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=Accent}" FontSize="14"/>
+                                                <TextBlock Text="{Binding Description}" Foreground="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=MutedText}" FontSize="11" Margin="0,3,0,0"/>
+                                                <TextBlock Foreground="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=MutedText}" FontSize="10" Margin="0,3,0,0">
+                                                    <TextBlock.Text>
+                                                        <MultiBinding StringFormat="Members: {0}">
+                                                            <Binding Path="MemberIds.Count"/>
+                                                        </MultiBinding>
+                                                    </TextBlock.Text>
+                                                </TextBlock>
+                                            </StackPanel>
+                                        </Border>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </Border>
+                    </TabItem>
+
+                    <!-- Economy Tab -->
+                    <TabItem Header="Economy">
+                        <Border Background="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=HeaderBg}" CornerRadius="8" Padding="15">
+                            <ScrollViewer>
+                                <StackPanel Spacing="20">
+                                    <TextBlock Text="{Binding CurrentTurn, StringFormat='World Economy - Turn {0}'}" FontSize="20" FontWeight="Bold" Foreground="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=TextColor}" Margin="0,0,0,10"/>
+                                    
+                                    <StackPanel>
+                                        <TextBlock Text="Global Indicators" FontSize="16" FontWeight="Bold" Foreground="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=TextColor}" Margin="0,0,0,5"/>
+                                        <DataGrid ItemsSource="{Binding GlobalIndicators}" AutoGenerateColumns="False" IsReadOnly="True" Height="150">
+                                            <DataGrid.Columns>
+                                                <DataGridTextColumn Header="Metric" Binding="{Binding Category}" Width="*"/>
+                                                <DataGridTextColumn Header="Value" Binding="{Binding Value}" Width="*"/>
+                                            </DataGrid.Columns>
+                                        </DataGrid>
+                                    </StackPanel>
+                                    
+                                    <StackPanel>
+                                        <TextBlock Text="Industry Sectors" FontSize="16" FontWeight="Bold" Foreground="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=TextColor}" Margin="0,0,0,5"/>
+                                        <DataGrid ItemsSource="{Binding IndustrySectors}" AutoGenerateColumns="False" IsReadOnly="True" Height="120">
+                                            <DataGrid.Columns>
+                                                <DataGridTextColumn Header="Sector" Binding="{Binding Category}" Width="*"/>
+                                                <DataGridTextColumn Header="World Average" Binding="{Binding Value}" Width="*"/>
+                                            </DataGrid.Columns>
+                                        </DataGrid>
+                                    </StackPanel>
+                                    
+                                    <Grid ColumnDefinitions="*,*">
+                                        <StackPanel Grid.Column="0" Margin="0,0,10,0">
+                                            <TextBlock Text="Top GDP Economies" FontSize="14" FontWeight="Bold" Foreground="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=TextColor}" Margin="0,0,0,5"/>
+                                            <DataGrid ItemsSource="{Binding TopEconomies}" AutoGenerateColumns="False" IsReadOnly="True" Height="180">
+                                                <DataGrid.Columns>
+                                                    <DataGridTextColumn Header="#" Binding="{Binding Rank}" Width="30"/>
+                                                    <DataGridTextColumn Header="Country" Binding="{Binding Country}" Width="*"/>
+                                                    <DataGridTextColumn Header="GDP" Binding="{Binding Gdp}" Width="100"/>
+                                                    <DataGridTextColumn Header="Growth" Binding="{Binding Growth}" Width="60"/>
+                                                </DataGrid.Columns>
+                                            </DataGrid>
+                                        </StackPanel>
+                                        
+                                        <StackPanel Grid.Column="1">
+                                            <TextBlock Text="Top Exporters" FontSize="14" FontWeight="Bold" Foreground="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=TextColor}" Margin="0,0,0,5"/>
+                                            <DataGrid ItemsSource="{Binding TopExporters}" AutoGenerateColumns="False" IsReadOnly="True" Height="180">
+                                                <DataGrid.Columns>
+                                                    <DataGridTextColumn Header="#" Binding="{Binding Rank}" Width="30"/>
+                                                    <DataGridTextColumn Header="Country" Binding="{Binding Country}" Width="*"/>
+                                                    <DataGridTextColumn Header="Exports" Binding="{Binding Exports}" Width="100"/>
+                                                </DataGrid.Columns>
+                                            </DataGrid>
+                                        </StackPanel>
+                                    </Grid>
+                                    
+                                    <Grid ColumnDefinitions="*,*">
+                                        <StackPanel Grid.Column="0" Margin="0,0,10,0">
+                                            <TextBlock Text="Top Tech Sectors" FontSize="14" FontWeight="Bold" Foreground="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=TextColor}" Margin="0,0,0,5"/>
+                                            <DataGrid ItemsSource="{Binding TopTechSectors}" AutoGenerateColumns="False" IsReadOnly="True" Height="180">
+                                                <DataGrid.Columns>
+                                                    <DataGridTextColumn Header="#" Binding="{Binding Rank}" Width="30"/>
+                                                    <DataGridTextColumn Header="Country" Binding="{Binding Country}" Width="*"/>
+                                                    <DataGridTextColumn Header="Tech %" Binding="{Binding TechPercent}" Width="80"/>
+                                                </DataGrid.Columns>
+                                            </DataGrid>
+                                        </StackPanel>
+                                        
+                                        <StackPanel Grid.Column="1">
+                                            <TextBlock Text="Top Manufacturers" FontSize="14" FontWeight="Bold" Foreground="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=TextColor}" Margin="0,0,0,5"/>
+                                            <DataGrid ItemsSource="{Binding TopManufacturers}" AutoGenerateColumns="False" IsReadOnly="True" Height="180">
+                                                <DataGrid.Columns>
+                                                    <DataGridTextColumn Header="#" Binding="{Binding Rank}" Width="30"/>
+                                                    <DataGridTextColumn Header="Country" Binding="{Binding Country}" Width="*"/>
+                                                    <DataGridTextColumn Header="Manufacturing %" Binding="{Binding ManufacturingPercent}" Width="120"/>
+                                                </DataGrid.Columns>
+                                            </DataGrid>
+                                        </StackPanel>
+                                    </Grid>
+                                    
+                                    <Grid ColumnDefinitions="*,*">
+                                        <StackPanel Grid.Column="0" Margin="0,0,10,0">
+                                            <TextBlock Text="Currency Strength" FontSize="14" FontWeight="Bold" Foreground="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=TextColor}" Margin="0,0,0,5"/>
+                                            <DataGrid ItemsSource="{Binding CurrencyStrengthList}" AutoGenerateColumns="False" IsReadOnly="True" Height="150">
+                                                <DataGrid.Columns>
+                                                    <DataGridTextColumn Header="#" Binding="{Binding Rank}" Width="30"/>
+                                                    <DataGridTextColumn Header="Country" Binding="{Binding Name}" Width="*"/>
+                                                    <DataGridTextColumn Header="Strength" Binding="{Binding Value}" Width="80"/>
+                                                </DataGrid.Columns>
+                                            </DataGrid>
+                                        </StackPanel>
+                                        
+                                        <StackPanel Grid.Column="1">
+                                            <TextBlock Text="Labor Markets" FontSize="14" FontWeight="Bold" Foreground="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=TextColor}" Margin="0,0,0,5"/>
+                                            <DataGrid ItemsSource="{Binding LaborMarkets}" AutoGenerateColumns="False" IsReadOnly="True" Height="150">
+                                                <DataGrid.Columns>
+                                                    <DataGridTextColumn Header="Metric" Binding="{Binding Category}" Width="*"/>
+                                                    <DataGridTextColumn Header="Value" Binding="{Binding Value}" Width="*"/>
+                                                </DataGrid.Columns>
+                                            </DataGrid>
+                                        </StackPanel>
+                                    </Grid>
+                                    
+                                    <StackPanel>
+                                        <TextBlock Text="Key Economic Metrics" FontSize="14" FontWeight="Bold" Foreground="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=TextColor}" Margin="0,0,0,5"/>
+                                        <DataGrid ItemsSource="{Binding KeyEconomicMetrics}" AutoGenerateColumns="False" IsReadOnly="True" Height="120">
+                                            <DataGrid.Columns>
+                                                <DataGridTextColumn Header="Metric" Binding="{Binding Category}" Width="*"/>
+                                                <DataGridTextColumn Header="Count" Binding="{Binding Value}" Width="*"/>
+                                            </DataGrid.Columns>
+                                        </DataGrid>
+                                    </StackPanel>
+                                </StackPanel>
+                            </ScrollViewer>
+                        </Border>
+                    </TabItem>
+
+                    <!-- Compare Tab -->
+                    <TabItem Header="Compare">
+                        <Border Background="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=HeaderBg}" CornerRadius="8" Padding="15">
+                            <Grid RowDefinitions="Auto,Auto,*">
+                                <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="20" Margin="0,0,0,10">
+                                    <StackPanel>
+                                        <TextBlock Text="Country 1" Foreground="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=MutedText}" FontSize="11" Margin="0,0,0,5"/>
+                                        <ComboBox ItemsSource="{Binding FilteredCountries}" SelectedItem="{Binding CompareCountry1}" 
+                                                  DisplayMemberBinding="{Binding Name}" Width="200"
+                                                  Background="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=ComboBoxBg}"
+                                                  Foreground="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=TextColor}"
+                                                  BorderBrush="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=ComboBoxBorder}"/>
+                                    </StackPanel>
+                                    <StackPanel>
+                                        <TextBlock Text="Country 2" Foreground="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=MutedText}" FontSize="11" Margin="0,0,0,5"/>
+                                        <ComboBox ItemsSource="{Binding FilteredCountries}" SelectedItem="{Binding CompareCountry2}"
+                                                  DisplayMemberBinding="{Binding Name}" Width="200"
+                                                  Background="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=ComboBoxBg}"
+                                                  Foreground="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=TextColor}"
+                                                  BorderBrush="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=ComboBoxBorder}"/>
+                                    </StackPanel>
+                                </StackPanel>
+                                <Button Grid.Row="1" Content="Compare" Command="{Binding CompareCountriesCommand}" 
+                                        HorizontalAlignment="Left" Padding="20,8" Margin="0,0,0,10" Background="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=SpecialBlue}" Foreground="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=ButtonText}"/>
+                                <ScrollViewer Grid.Row="2">
+                                    <DataGrid ItemsSource="{Binding CompareItems}" AutoGenerateColumns="False" IsReadOnly="True" GridLinesVisibility="Horizontal" CanUserResizeColumns="True">
+                                        <DataGrid.Columns>
+                                            <DataGridTextColumn Header="Category" Binding="{Binding Category}" Width="150"/>
+                                            <DataGridTextColumn Header="" Binding="{Binding Country1Label}" Width="*"/>
+                                            <DataGridTextColumn Header="{Binding CompareCountry1.Name}" Binding="{Binding Country1Value}" Width="*"/>
+                                            <DataGridTextColumn Header="" Binding="{Binding Country2Label}" Width="*"/>
+                                            <DataGridTextColumn Header="{Binding CompareCountry2.Name}" Binding="{Binding Country2Value}" Width="*"/>
+                                        </DataGrid.Columns>
+                                    </DataGrid>
+                                </ScrollViewer>
+                            </Grid>
+                        </Border>
+                    </TabItem>
+                </TabControl>
+            </Grid>
+
+            <!-- Right Panel - Events -->
+            <Border Grid.Column="2" Background="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=HeaderBg}" CornerRadius="8" Padding="10" Margin="5,0,0,0">
+                <Grid RowDefinitions="Auto,*">
+                    <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,10">
+                        <TextBlock Text="World Events" FontSize="18" FontWeight="Bold" Foreground="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=TextColor}"/>
+                        <Button Content="{Binding EventSortAscending, Converter={StaticResource SortTextConverter}}" 
+                                Command="{Binding ToggleEventSortCommand}"
+                                Background="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=ButtonNeutralBg}" Foreground="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=ButtonTextNeutral}" Padding="10,2" Margin="10,0,0,0" FontSize="11"/>
+                    </StackPanel>
+                    <ListBox Grid.Row="1" ItemsSource="{Binding Events}" 
+                             Background="Transparent" BorderThickness="0">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Border Padding="8" Margin="2" CornerRadius="4" Background="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=ItemBg}">
+                                    <StackPanel>
+                                        <StackPanel Orientation="Horizontal" Spacing="8">
+                                            <TextBlock Text="{Binding Turn, StringFormat='Turn {0}'}" Foreground="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=MutedText}" FontSize="10"/>
+                                            <TextBlock Text="{Binding Type}" Foreground="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=Accent}" FontSize="10" FontWeight="Bold"/>
+                                        </StackPanel>
+                                        <TextBlock Text="{Binding Title}" Foreground="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=TextColor}" FontSize="12" FontWeight="Bold" Margin="0,3,0,0"/>
+                                        <TextBlock Text="{Binding Description}" Foreground="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=MutedText}" FontSize="11" 
+                                                   TextWrapping="Wrap" Margin="0,2,0,0"/>
+                                    </StackPanel>
+                                </Border>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <!-- Footer -->
+        <Border Grid.Row="2" Background="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=HeaderBg}" CornerRadius="8" Padding="15" Margin="0,10,0,0">
+            <Grid ColumnDefinitions="Auto,*,Auto">
+                <StackPanel Orientation="Horizontal" Spacing="15">
+                    <StackPanel Orientation="Horizontal" Spacing="10">
+                        <TextBlock Text="Speed:" Foreground="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=TextColor}" VerticalAlignment="Center"/>
+                        <Button Content="Slow" Command="{Binding SetSpeedCommand}" CommandParameter="2000"
+                                Background="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=ButtonNeutralBg}" Foreground="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=ButtonTextNeutral}" Padding="10,5"/>
+                        <Button Content="Normal" Command="{Binding SetSpeedCommand}" CommandParameter="1000"
+                                Background="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=ButtonNeutralBg}" Foreground="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=ButtonTextNeutral}" Padding="10,5"/>
+                        <Button Content="Fast" Command="{Binding SetSpeedCommand}" CommandParameter="500"
+                                Background="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=ButtonNeutralBg}" Foreground="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=ButtonTextNeutral}" Padding="10,5"/>
+                    </StackPanel>
+                    
+                    <StackPanel Orientation="Horizontal" Spacing="10">
+                        <TextBlock Text="Difficulty:" Foreground="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=TextColor}" VerticalAlignment="Center"/>
+                        <ComboBox ItemsSource="{Binding DifficultyOptions}" SelectedItem="{Binding Difficulty}" Width="100"
+                                  Background="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=ComboBoxBg}"
+                                  Foreground="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=TextColor}"
+                                  BorderBrush="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=ComboBoxBorder}"/>
+                        <Button Content="Apply" Command="{Binding SetDifficultyCommand}" CommandParameter="{Binding Difficulty}"
+                                Padding="10,5" Background="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=ButtonPrimaryBg}" Foreground="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=ButtonText}"/>
+                    </StackPanel>
+                    
+                    <Button Content="Toggle Theme" Command="{Binding ToggleThemeCommand}"
+                            Background="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=ButtonNeutralBg}" Foreground="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=ButtonTextNeutral}" Padding="10,5"/>
+                </StackPanel>
+                
+                <!-- <TextBlock Grid.Column="2" Text="World Simulation v3.0 - Enhanced Edition" Foreground="{Binding IsDarkTheme, Converter={StaticResource ThemeResourceConverter}, ConverterParameter=MutedText}" VerticalAlignment="Center"/> -->
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

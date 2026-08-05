@@ -1,0 +1,71 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="WorldSimApp.App"
+             xmlns:local="using:WorldSimApp"
+             xmlns:views="using:WorldSimApp.Views"
+             RequestedThemeVariant="Default">
+
+    <Application.Resources>
+        <views:ThemeResourceConverter x:Key="ThemeResourceConverter"/>
+        <views:SortTextConverter x:Key="SortTextConverter"/>
+    </Application.Resources>
+  
+    <Application.DataTemplates>
+        <local:ViewLocator/>
+    </Application.DataTemplates>
+   
+    <Application.Styles>
+        <FluentTheme />
+        <StyleInclude Source="avares://Avalonia.Controls.DataGrid/Themes/Fluent.xaml"/>
+        
+        <!-- Global Corner Radius -->
+        <Style Selector="Button">
+            <Setter Property="CornerRadius" Value="4"/>
+        </Style>
+        
+        <!-- Base Button Style - Uses FluentTheme defaults -->
+        <Style Selector="Button">
+            <Setter Property="Padding" Value="12,6"/>
+            <Setter Property="FontSize" Value="14"/>
+        </Style>
+        
+        <!-- Card/Border Style -->
+        <Style Selector="Border.card">
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="15"/>
+            <Setter Property="Margin" Value="0,0,0,10"/>
+        </Style>
+        
+        <!-- Header Text Style -->
+        <Style Selector="TextBlock.header">
+            <Setter Property="FontSize" Value="24"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+        </Style>
+        
+        <Style Selector="TextBlock.subheader">
+            <Setter Property="FontSize" Value="18"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+        </Style>
+        
+        <Style Selector="TextBlock.label">
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+        </Style>
+        
+        <Style Selector="TextBlock.caption">
+            <Setter Property="FontSize" Value="12"/>
+        </Style>
+        
+        <Style Selector="TextBlock.small">
+            <Setter Property="FontSize" Value="11"/>
+        </Style>
+        
+        <!-- DataGrid Styling -->
+        <Style Selector="DataGrid">
+            <Setter Property="GridLinesVisibility" Value="Horizontal"/>
+            <Setter Property="CanUserResizeColumns" Value="True"/>
+            <Setter Property="AutoGenerateColumns" Value="False"/>
+            <Setter Property="IsReadOnly" Value="True"/>
+        </Style>
+    </Application.Styles>
+</Application>
